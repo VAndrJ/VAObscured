@@ -24,6 +24,7 @@ let package = Package(
             ]
         ),
         .target(name: "VAObscured", dependencies: ["VAObscuredMacros"]),
+        .executableTarget(name: "VAObscuredClient", dependencies: ["VAObscured"]),
         .testTarget(
             name: "VAObscuredTests",
             dependencies: [

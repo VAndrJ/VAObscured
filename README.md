@@ -16,7 +16,7 @@
 Encodes String literals to make them a little harder to find.
 
 
-Example:
+Example 1:
 
 
 ```swift
@@ -32,6 +32,29 @@ let string = {
         result.append(byte ^ 42) // 42 is a random number.
     }
 
+    return String(bytes: result, encoding: .utf8)!
+}()
+```
+
+
+Example 2:
+
+
+```swift
+let string = #Obscured("test", encoding: .xor(keysCount: 4, keyShift: .addition))
+
+// expands to
+
+let string = {
+    let data = Data([94, 78, 95, 89])
+
+    var result = Data()
+    let max = Int(UInt8.max)
+    let keys: [UInt8] = [42, 42, 42, 42] // Random numbers here.
+    for (index, byte) in zip(data.indices, data) {
+        let key = keys[index % keys.count]
+        result.append(byte ^ (key &+ UInt8(index % max)))
+    }
     return String(bytes: result, encoding: .utf8)!
 }()
 ```
