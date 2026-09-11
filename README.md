@@ -19,6 +19,13 @@ Encodes String literals to make them a little harder to find.
 Decimal, hexadecimal, octal, and binary literals (including digit separators) are supported.
 Zero, negative values, values above `1024`, variables, and expressions produce a compile-time diagnostic.
 
+`encoding` accepts `.xor`, `.xor()`, or `.xor(keysCount: ..., keyShift: ...)`, with either
+argument optional. Each label may appear once, with `keysCount` before `keyShift` when both
+are supplied. `keyShift` accepts `.none`, `.addition`, or `.substraction`.
+Encoding members may be qualified with `ObscuredEncoding` or `VAObscured.ObscuredEncoding`;
+shift members may use the corresponding `KeyShift` type. Variables, type aliases, helper
+calls, and other expressions are not evaluated by the macro and are diagnosed instead.
+
 
 Example 1:
 

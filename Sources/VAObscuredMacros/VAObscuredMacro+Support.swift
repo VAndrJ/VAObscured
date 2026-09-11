@@ -12,7 +12,6 @@ struct Arguments {
     static let supportedKeysCount = 1...1024
 
     let string: String
-    let encoding: String
     let keysCount: Int
     let isAdding: Bool?
 }
@@ -30,38 +29,20 @@ extension LabeledExprListSyntax {
                 throw VAObscuredError.notStringLiteral
             }
 
-            let encoding: String = .xor
+            guard first?.label == nil else {
+                throw ArgumentError(error: .invalidMacroArguments, node: first!.expression)
+            }
             var keysCount = 1
             var isAdding: Bool? = nil
-
-            for expr in self.dropFirst() {
-                if let labeledExpr = expr.as(LabeledExprSyntax.self) {
-                    if labeledExpr.label?.text == "encoding" {
-                        if labeledExpr.expression.description.contains("xor") {
-                            if let arguments = labeledExpr.expression.as(FunctionCallExprSyntax.self)?.arguments {
-                                for argument in arguments {
-                                    if argument.label?.text == "keysCount" {
-                                        keysCount = try parseKeysCount(argument.expression)
-                                    }
-                                    if argument.label?.text == "keyShift",
-                                        let value = argument.expression.as(MemberAccessExprSyntax.self)?.declName.baseName.text
-                                    {
-                                        switch value {
-                                        case "addition": isAdding = true
-                                        case "substraction": isAdding = false
-                                        default: break
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            for (index, argument) in dropFirst().enumerated() {
+                guard index == 0, argument.label?.text == "encoding" else {
+                    throw ArgumentError(error: .invalidMacroArguments, node: argument.expression)
                 }
+                (keysCount, isAdding) = try parseEncoding(argument.expression)
             }
 
             return .init(
                 string: string,
-                encoding: encoding,
                 keysCount: keysCount,
                 isAdding: isAdding
             )
@@ -95,6 +76,69 @@ private func parseKeysCount(_ expression: ExprSyntax) throws -> Int {
     return count
 }
 
-extension String {
-    static let xor = "xor"
+private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, Bool?) {
+    let call = expression.as(FunctionCallExprSyntax.self)
+    let memberExpression = call?.calledExpression ?? expression
+    guard
+        isMember(
+            memberExpression,
+            named: "xor",
+            qualifiers: [
+                ["ObscuredEncoding"], ["VAObscured", "ObscuredEncoding"],
+            ]
+        ), call?.trailingClosure == nil, call?.additionalTrailingClosures.isEmpty != false
+    else {
+        throw ArgumentError(error: .invalidEncoding, node: expression)
+    }
+
+    var keysCount = 1
+    var isAdding: Bool? = nil
+    var labels = Set<String>()
+    for argument in call?.arguments ?? LabeledExprListSyntax() {
+        guard let label = argument.label?.text,
+            ["keysCount", "keyShift"].contains(label), labels.insert(label).inserted,
+            !(label == "keysCount" && labels.contains("keyShift"))
+        else {
+            throw ArgumentError(error: .invalidEncodingArguments, node: argument.expression)
+        }
+        switch label {
+        case "keysCount": keysCount = try parseKeysCount(argument.expression)
+        default: isAdding = try parseKeyShift(argument.expression)
+        }
+    }
+    return (keysCount, isAdding)
+}
+
+private func parseKeyShift(_ expression: ExprSyntax) throws -> Bool? {
+    for (name, shift): (String, Bool?) in [("none", nil), ("addition", true), ("substraction", false)] {
+        if isMember(
+            expression,
+            named: name,
+            qualifiers: [
+                ["ObscuredEncoding", "KeyShift"], ["VAObscured", "ObscuredEncoding", "KeyShift"],
+            ]
+        ) {
+            return shift
+        }
+    }
+    throw ArgumentError(error: .invalidKeyShift, node: expression)
+}
+
+private func isMember(_ expression: ExprSyntax, named name: String, qualifiers: [[String]]) -> Bool {
+    guard let member = expression.as(MemberAccessExprSyntax.self),
+        member.declName.baseName.text == name, member.declName.argumentNames == nil
+    else { return false }
+    guard let base = member.base else { return true }
+    guard let path = qualifiedName(base) else { return false }
+    return qualifiers.contains(path)
+}
+
+private func qualifiedName(_ expression: ExprSyntax) -> [String]? {
+    if let reference = expression.as(DeclReferenceExprSyntax.self), reference.argumentNames == nil {
+        return [reference.baseName.text]
+    }
+    guard let member = expression.as(MemberAccessExprSyntax.self), member.declName.argumentNames == nil,
+        let base = member.base, let path = qualifiedName(base)
+    else { return nil }
+    return path + [member.declName.baseName.text]
 }

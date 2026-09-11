@@ -1,8 +1,8 @@
+import Foundation
 import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import Foundation
 
 public struct ObscuredMacro: ExpressionMacro {
     public static var generator: RandomNumberGenerator = SystemRandomNumberGenerator()
@@ -12,6 +12,9 @@ public struct ObscuredMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) -> ExprSyntax {
         do {
+            if let closure = node.trailingClosure {
+                throw ArgumentError(error: .invalidMacroArguments, node: ExprSyntax(closure))
+            }
             let arguments = try node.argumentList.arguments
             guard let data = arguments.string.data(using: .utf8) else {
                 let error = VAObscuredError.failedToGetData
@@ -22,28 +25,34 @@ public struct ObscuredMacro: ExpressionMacro {
 
             return try ExprSyntax(
                 FunctionCallExprSyntax(
-                    calledExpression: ClosureExprSyntax(statements: CodeBlockItemListSyntax(itemsBuilder: {
-                        try getXORCodeBlockItemListSyntax(
-                            data: data,
-                            keysCount: arguments.keysCount,
-                            isAdding: arguments.isAdding
-                        )
-                        ReturnStmtSyntax(expression: ForceUnwrapExprSyntax(expression: FunctionCallExprSyntax(
-                            calledExpression: DeclReferenceExprSyntax(baseName: .identifier("String")),
-                            leftParen: .leftParenToken(),
-                            arguments: LabeledExprListSyntax {
-                                LabeledExprSyntax(
-                                    label: "bytes",
-                                    expression: DeclReferenceExprSyntax(baseName: .identifier("result"))
+                    calledExpression: ClosureExprSyntax(
+                        statements: CodeBlockItemListSyntax(itemsBuilder: {
+                            try getXORCodeBlockItemListSyntax(
+                                data: data,
+                                keysCount: arguments.keysCount,
+                                isAdding: arguments.isAdding
+                            )
+                            ReturnStmtSyntax(
+                                expression: ForceUnwrapExprSyntax(
+                                    expression: FunctionCallExprSyntax(
+                                        calledExpression: DeclReferenceExprSyntax(baseName: .identifier("String")),
+                                        leftParen: .leftParenToken(),
+                                        arguments: LabeledExprListSyntax {
+                                            LabeledExprSyntax(
+                                                label: "bytes",
+                                                expression: DeclReferenceExprSyntax(baseName: .identifier("result"))
+                                            )
+                                            LabeledExprSyntax(
+                                                label: "encoding",
+                                                expression: MemberAccessExprSyntax(declName: DeclReferenceExprSyntax(baseName: .identifier("utf8")))
+                                            )
+                                        },
+                                        rightParen: .rightParenToken()
+                                    )
                                 )
-                                LabeledExprSyntax(
-                                    label: "encoding",
-                                    expression: MemberAccessExprSyntax(declName: DeclReferenceExprSyntax(baseName: .identifier("utf8")))
-                                )
-                            },
-                            rightParen: .rightParenToken()
-                        )))
-                    })),
+                            )
+                        })
+                    ),
                     leftParen: .leftParenToken(),
                     arguments: LabeledExprListSyntax(),
                     rightParen: .rightParenToken()
@@ -81,18 +90,20 @@ public struct ObscuredMacro: ExpressionMacro {
             throw VAObscuredError.obscuredIsNotValid
         }
 
-        return CodeBlockItemListSyntax("""
-        
-            let data = Data(\(raw: xorData))
-        
-            var result = Data()
-            \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
-            let keys: [UInt8] = \(raw: keys)
-            for (index, byte) in zip(data.indices, data) {
-                let key = keys[index % keys.count]
-                result.append(byte ^ \(raw: (isAdding == true ? "(key &+ UInt8(index % max))" : isAdding == false ? "(key &- UInt8(index % max))" : "key")))
-            }
-        """)
+        return CodeBlockItemListSyntax(
+            """
+
+                let data = Data(\(raw: xorData))
+
+                var result = Data()
+                \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
+                let keys: [UInt8] = \(raw: keys)
+                for (index, byte) in zip(data.indices, data) {
+                    let key = keys[index % keys.count]
+                    result.append(byte ^ \(raw: (isAdding == true ? "(key &+ UInt8(index % max))" : isAdding == false ? "(key &- UInt8(index % max))" : "key")))
+                }
+            """
+        )
     }
 
     public static func getXORCodeBlockItemListSyntax(data: Data, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
@@ -103,16 +114,18 @@ public struct ObscuredMacro: ExpressionMacro {
             throw VAObscuredError.obscuredIsNotValid
         }
 
-        return CodeBlockItemListSyntax("""
-        
-            let data = Data(\(raw: xorData))
-        
-            var result = Data()
-            \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
-            for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in zip(data.indices, data)")) {
-                result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ UInt8(index % max))" : isAdding == false ? "(\(key) &- UInt8(index % max))" : "\(key)")))
-            }
-        """)
+        return CodeBlockItemListSyntax(
+            """
+
+                let data = Data(\(raw: xorData))
+
+                var result = Data()
+                \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
+                for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in zip(data.indices, data)")) {
+                    result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ UInt8(index % max))" : isAdding == false ? "(\(key) &- UInt8(index % max))" : "\(key)")))
+                }
+            """
+        )
     }
 
     public static func getIsXORValid(result: [UInt8], key: UInt8, isAdding: Bool?) -> Bool {
@@ -176,6 +189,6 @@ public struct ObscuredMacro: ExpressionMacro {
 @main
 struct VAObscuredPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        ObscuredMacro.self,
+        ObscuredMacro.self
     ]
 }
