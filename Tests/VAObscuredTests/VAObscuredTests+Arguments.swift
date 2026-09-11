@@ -19,7 +19,7 @@ struct VAObscuredArgumentTests {
     func defaultEncoding(expression: String) throws {
         let arguments = try parse("#Obscured(\"test\", encoding: \(expression))")
         #expect(arguments.keysCount == 1)
-        #expect(arguments.isAdding == nil)
+        #expect(arguments.keyShift == .none)
     }
 
     @Test(
@@ -39,17 +39,17 @@ struct VAObscuredArgumentTests {
         let shiftExpression = qualifier.isEmpty ? ".\(shift)" : "\(qualifier)KeyShift.\(shift)"
         let arguments = try parse("#Obscured(\"test\", encoding: \(encoding)(keysCount: 4, keyShift: \(shiftExpression)))")
         #expect(arguments.keysCount == 4)
-        #expect(arguments.isAdding == (shift == "none" ? nil : shift == "addition"))
+        #expect(arguments.keyShift.rawValue == shift)
     }
 
     @Test
     func omittedArgumentsAndTrivia() throws {
         let defaults = try parse(#"#Obscured("test")"#)
         #expect(defaults.keysCount == 1)
-        #expect(defaults.isAdding == nil)
+        #expect(defaults.keyShift == .none)
         let shiftOnly = try parse(#"#Obscured("test", encoding: .xor(keyShift: .addition))"#)
         #expect(shiftOnly.keysCount == 1)
-        #expect(shiftOnly.isAdding == true)
+        #expect(shiftOnly.keyShift == .addition)
         let withComments = try parse(#"#Obscured("test", encoding: ObscuredEncoding /* comment */ .xor(keysCount: 4))"#)
         #expect(withComments.keysCount == 4)
     }

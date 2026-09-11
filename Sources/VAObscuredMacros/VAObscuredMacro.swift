@@ -5,11 +5,11 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 public struct ObscuredMacro: ExpressionMacro {
-    static func generateKey(isAdding: Bool?, using generator: inout some RandomNumberGenerator) -> UInt8 {
+    static func generateKey(keyShift: KeyShift, using generator: inout some RandomNumberGenerator) -> UInt8 {
         var key: UInt8
         repeat {
             key = .random(in: .min...UInt8.max, using: &generator)
-        } while isAdding == nil && key == 0
+        } while keyShift == .none && key == 0
         return key
     }
 
@@ -45,7 +45,7 @@ public struct ObscuredMacro: ExpressionMacro {
                             try getXORCodeBlockItemListSyntax(
                                 data: data,
                                 keysCount: arguments.keysCount,
-                                isAdding: arguments.isAdding,
+                                keyShift: arguments.keyShift,
                                 using: &generator
                             )
                             ReturnStmtSyntax(expression: ExprSyntax("Swift.String(decoding: result, as: Swift.UTF8.self)"))
@@ -69,22 +69,22 @@ public struct ObscuredMacro: ExpressionMacro {
         }
     }
 
-    static func getXORCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
+    static func getXORCodeBlockItemListSyntax(data: Data, keysCount: Int, keyShift: KeyShift, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
         if keysCount == 1 {
-            return try getXORCodeBlockItemListSyntax(data: data, isAdding: isAdding, using: &generator)
+            return try getXORCodeBlockItemListSyntax(data: data, keyShift: keyShift, using: &generator)
         } else {
-            return try getXORMultipleKeysCodeBlockItemListSyntax(data: data, keysCount: keysCount, isAdding: isAdding, using: &generator)
+            return try getXORMultipleKeysCodeBlockItemListSyntax(data: data, keysCount: keysCount, keyShift: keyShift, using: &generator)
         }
     }
 
-    static func getXORMultipleKeysCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
+    static func getXORMultipleKeysCodeBlockItemListSyntax(data: Data, keysCount: Int, keyShift: KeyShift, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
         guard Arguments.supportedKeysCount.contains(keysCount) else {
             throw VAObscuredError.invalidKeysCount
         }
-        let keys: [UInt8] = (0..<keysCount).map { _ in generateKey(isAdding: isAdding, using: &generator) }
-        let xorData: [UInt8] = Array(xor(data: data, keys: keys, isAdding: isAdding))
+        let keys: [UInt8] = (0..<keysCount).map { _ in generateKey(keyShift: keyShift, using: &generator) }
+        let xorData: [UInt8] = Array(xor(data: data, keys: keys, keyShift: keyShift))
 
-        guard getIsXORValid(result: xorData, keys: keys, isAdding: isAdding) else {
+        guard getIsXORValid(result: xorData, keys: keys, keyShift: keyShift) else {
             throw VAObscuredError.obscuredIsNotValid
         }
 
@@ -94,21 +94,21 @@ public struct ObscuredMacro: ExpressionMacro {
                 let data: [Swift.UInt8] = \(raw: xorData)
 
                 var result: [Swift.UInt8] = []
-                \(raw: (isAdding == nil ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
+                \(raw: (keyShift == .none ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
                 let keys: [Swift.UInt8] = \(raw: keys)
                 for (index, byte) in Swift.zip(data.indices, data) {
                     let key = keys[index % keys.count]
-                    result.append(byte ^ \(raw: (isAdding == true ? "(key &+ Swift.UInt8(index % max))" : isAdding == false ? "(key &- Swift.UInt8(index % max))" : "key")))
+                    result.append(byte ^ \(raw: keyShift.expression(for: "key")))
                 }
             """
         )
     }
 
-    static func getXORCodeBlockItemListSyntax(data: Data, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
-        let key = generateKey(isAdding: isAdding, using: &generator)
-        let xorData: [UInt8] = Array(xor(data: data, key: key, isAdding: isAdding))
+    static func getXORCodeBlockItemListSyntax(data: Data, keyShift: KeyShift, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
+        let key = generateKey(keyShift: keyShift, using: &generator)
+        let xorData: [UInt8] = Array(xor(data: data, key: key, keyShift: keyShift))
 
-        guard getIsXORValid(result: xorData, key: key, isAdding: isAdding) else {
+        guard getIsXORValid(result: xorData, key: key, keyShift: keyShift) else {
             throw VAObscuredError.obscuredIsNotValid
         }
 
@@ -118,66 +118,36 @@ public struct ObscuredMacro: ExpressionMacro {
                 let data: [Swift.UInt8] = \(raw: xorData)
 
                 var result: [Swift.UInt8] = []
-                \(raw: (isAdding == nil ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
-                for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in Swift.zip(data.indices, data)")) {
-                    result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ Swift.UInt8(index % max))" : isAdding == false ? "(\(key) &- Swift.UInt8(index % max))" : "\(key)")))
+                \(raw: (keyShift == .none ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
+                for \(raw: (keyShift == .none ? "byte in data" : "(index, byte) in Swift.zip(data.indices, data)")) {
+                    result.append(byte ^ \(raw: keyShift.expression(for: "\(key)")))
                 }
             """
         )
     }
 
-    public static func getIsXORValid(result: [UInt8], key: UInt8, isAdding: Bool?) -> Bool {
-        String(bytes: xor(data: Data(result), key: key, isAdding: isAdding), encoding: .utf8) != nil
+    static func getIsXORValid(result: [UInt8], key: UInt8, keyShift: KeyShift) -> Bool {
+        String(bytes: xor(data: Data(result), key: key, keyShift: keyShift), encoding: .utf8) != nil
     }
 
-    public static func xor(data: Data, key: UInt8, isAdding: Bool?) -> Data {
+    static func xor(data: Data, key: UInt8, keyShift: KeyShift) -> Data {
         var result = Data()
-        switch isAdding {
-        case let .some(isAdding):
-            let max = Int(UInt8.max)
-            if isAdding {
-                for (index, byte) in zip(data.indices, data) {
-                    result.append(byte ^ (key &+ UInt8(index % max)))
-                }
-            } else {
-                for (index, byte) in zip(data.indices, data) {
-                    result.append(byte ^ (key &- UInt8(index % max)))
-                }
-            }
-        case .none:
-            for byte in data {
-                result.append(byte ^ key)
-            }
+        for (index, byte) in zip(data.indices, data) {
+            result.append(byte ^ keyShift.apply(to: key, at: index))
         }
 
         return result
     }
 
-    public static func getIsXORValid(result: [UInt8], keys: [UInt8], isAdding: Bool?) -> Bool {
-        String(bytes: xor(data: Data(result), keys: keys, isAdding: isAdding), encoding: .utf8) != nil
+    static func getIsXORValid(result: [UInt8], keys: [UInt8], keyShift: KeyShift) -> Bool {
+        String(bytes: xor(data: Data(result), keys: keys, keyShift: keyShift), encoding: .utf8) != nil
     }
 
-    public static func xor(data: Data, keys: [UInt8], isAdding: Bool?) -> Data {
+    static func xor(data: Data, keys: [UInt8], keyShift: KeyShift) -> Data {
         var result = Data()
-        switch isAdding {
-        case let .some(isAdding):
-            let max = Int(UInt8.max)
-            if isAdding {
-                for (index, byte) in zip(data.indices, data) {
-                    let key = keys[index % keys.count]
-                    result.append(byte ^ (key &+ UInt8(index % max)))
-                }
-            } else {
-                for (index, byte) in zip(data.indices, data) {
-                    let key = keys[index % keys.count]
-                    result.append(byte ^ (key &- UInt8(index % max)))
-                }
-            }
-        case .none:
-            for (index, byte) in zip(data.indices, data) {
-                let key = keys[index % keys.count]
-                result.append(byte ^ key)
-            }
+        for (index, byte) in zip(data.indices, data) {
+            let key = keys[index % keys.count]
+            result.append(byte ^ keyShift.apply(to: key, at: index))
         }
 
         return result

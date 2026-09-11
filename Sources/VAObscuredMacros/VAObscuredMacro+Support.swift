@@ -13,7 +13,7 @@ struct Arguments {
 
     let string: String
     let keysCount: Int
-    let isAdding: Bool?
+    let keyShift: KeyShift
 }
 
 extension LabeledExprListSyntax {
@@ -33,18 +33,18 @@ extension LabeledExprListSyntax {
                 throw ArgumentError(error: .invalidMacroArguments, node: first!.expression)
             }
             var keysCount = 1
-            var isAdding: Bool? = nil
+            var keyShift: KeyShift = .none
             for (index, argument) in dropFirst().enumerated() {
                 guard index == 0, argument.label?.text == "encoding" else {
                     throw ArgumentError(error: .invalidMacroArguments, node: argument.expression)
                 }
-                (keysCount, isAdding) = try parseEncoding(argument.expression)
+                (keysCount, keyShift) = try parseEncoding(argument.expression)
             }
 
             return .init(
                 string: string,
                 keysCount: keysCount,
-                isAdding: isAdding
+                keyShift: keyShift
             )
         }
     }
@@ -76,7 +76,7 @@ private func parseKeysCount(_ expression: ExprSyntax) throws -> Int {
     return count
 }
 
-private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, Bool?) {
+private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, KeyShift) {
     let call = expression.as(FunctionCallExprSyntax.self)
     let memberExpression = call?.calledExpression ?? expression
     guard
@@ -92,7 +92,7 @@ private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, Bool?) {
     }
 
     var keysCount = 1
-    var isAdding: Bool? = nil
+    var keyShift: KeyShift = .none
     var labels = Set<String>()
     for argument in call?.arguments ?? LabeledExprListSyntax() {
         guard let label = argument.label?.text,
@@ -103,17 +103,17 @@ private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, Bool?) {
         }
         switch label {
         case "keysCount": keysCount = try parseKeysCount(argument.expression)
-        default: isAdding = try parseKeyShift(argument.expression)
+        default: keyShift = try parseKeyShift(argument.expression)
         }
     }
-    return (keysCount, isAdding)
+    return (keysCount, keyShift)
 }
 
-private func parseKeyShift(_ expression: ExprSyntax) throws -> Bool? {
-    for (name, shift): (String, Bool?) in [("none", nil), ("addition", true), ("subtraction", false)] {
+private func parseKeyShift(_ expression: ExprSyntax) throws -> KeyShift {
+    for shift in KeyShift.allCases {
         if isMember(
             expression,
-            named: name,
+            named: shift.rawValue,
             qualifiers: [
                 ["ObscuredEncoding", "KeyShift"], ["VAObscured", "ObscuredEncoding", "KeyShift"],
             ]

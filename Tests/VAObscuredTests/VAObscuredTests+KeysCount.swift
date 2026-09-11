@@ -43,14 +43,14 @@ struct VAObscuredKeysCountTests {
 
     @Test(arguments: [0, -1, 1025, Int.max])
     func generationHelpersRejectInvalidCount(count: Int) {
-        for isAdding: Bool? in [nil, true, false] {
+        for keyShift in KeyShift.allCases {
             #expect(throws: VAObscuredError.self) {
                 var generator = MockGenerator()
-                _ = try ObscuredMacro.getXORCodeBlockItemListSyntax(data: Data("test".utf8), keysCount: count, isAdding: isAdding, using: &generator)
+                _ = try ObscuredMacro.getXORCodeBlockItemListSyntax(data: Data("test".utf8), keysCount: count, keyShift: keyShift, using: &generator)
             }
             #expect(throws: VAObscuredError.self) {
                 var generator = MockGenerator()
-                _ = try ObscuredMacro.getXORMultipleKeysCodeBlockItemListSyntax(data: Data(), keysCount: count, isAdding: isAdding, using: &generator)
+                _ = try ObscuredMacro.getXORMultipleKeysCodeBlockItemListSyntax(data: Data(), keysCount: count, keyShift: keyShift, using: &generator)
             }
         }
     }
