@@ -15,6 +15,9 @@
 
 Encodes String literals to make them a little harder to find.
 
+Use `import VAObscured` to access the macro. Generated code uses Swift byte arrays and
+UTF-8 decoding, so consumers do not need to import Foundation.
+
 `keysCount` defaults to `1` and must be an integer literal in `1...1024`.
 Decimal, hexadecimal, octal, and binary literals (including digit separators) are supported.
 Zero, negative values, values above `1024`, variables, and expressions produce a compile-time diagnostic.
@@ -36,14 +39,14 @@ let string = #Obscured("test")
 // expands to
 
 let string = {
-    let data = Data([94, 79, 89, 94])
+    let data: [UInt8] = [94, 79, 89, 94]
 
-    var result = Data()
+    var result: [UInt8] = []
     for byte in data {
         result.append(byte ^ 42) // 42 is a random number.
     }
 
-    return String(bytes: result, encoding: .utf8)!
+    return String(decoding: result, as: UTF8.self)
 }()
 ```
 
@@ -57,16 +60,16 @@ let string = #Obscured("test", encoding: .xor(keysCount: 4, keyShift: .addition)
 // expands to
 
 let string = {
-    let data = Data([94, 78, 95, 89])
+    let data: [UInt8] = [94, 78, 95, 89]
 
-    var result = Data()
+    var result: [UInt8] = []
     let max = Int(UInt8.max)
     let keys: [UInt8] = [42, 42, 42, 42] // Random numbers here.
     for (index, byte) in zip(data.indices, data) {
         let key = keys[index % keys.count]
         result.append(byte ^ (key &+ UInt8(index % max)))
     }
-    return String(bytes: result, encoding: .utf8)!
+    return String(decoding: result, as: UTF8.self)
 }()
 ```
 

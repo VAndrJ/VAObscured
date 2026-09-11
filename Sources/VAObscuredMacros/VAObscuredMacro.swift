@@ -32,25 +32,7 @@ public struct ObscuredMacro: ExpressionMacro {
                                 keysCount: arguments.keysCount,
                                 isAdding: arguments.isAdding
                             )
-                            ReturnStmtSyntax(
-                                expression: ForceUnwrapExprSyntax(
-                                    expression: FunctionCallExprSyntax(
-                                        calledExpression: DeclReferenceExprSyntax(baseName: .identifier("String")),
-                                        leftParen: .leftParenToken(),
-                                        arguments: LabeledExprListSyntax {
-                                            LabeledExprSyntax(
-                                                label: "bytes",
-                                                expression: DeclReferenceExprSyntax(baseName: .identifier("result"))
-                                            )
-                                            LabeledExprSyntax(
-                                                label: "encoding",
-                                                expression: MemberAccessExprSyntax(declName: DeclReferenceExprSyntax(baseName: .identifier("utf8")))
-                                            )
-                                        },
-                                        rightParen: .rightParenToken()
-                                    )
-                                )
-                            )
+                            ReturnStmtSyntax(expression: ExprSyntax("String(decoding: result, as: UTF8.self)"))
                         })
                     ),
                     leftParen: .leftParenToken(),
@@ -93,9 +75,9 @@ public struct ObscuredMacro: ExpressionMacro {
         return CodeBlockItemListSyntax(
             """
 
-                let data = Data(\(raw: xorData))
+                let data: [UInt8] = \(raw: xorData)
 
-                var result = Data()
+                var result: [UInt8] = []
                 \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
                 let keys: [UInt8] = \(raw: keys)
                 for (index, byte) in zip(data.indices, data) {
@@ -117,9 +99,9 @@ public struct ObscuredMacro: ExpressionMacro {
         return CodeBlockItemListSyntax(
             """
 
-                let data = Data(\(raw: xorData))
+                let data: [UInt8] = \(raw: xorData)
 
-                var result = Data()
+                var result: [UInt8] = []
                 \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
                 for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in zip(data.indices, data)")) {
                     result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ UInt8(index % max))" : isAdding == false ? "(\(key) &- UInt8(index % max))" : "\(key)")))

@@ -39,14 +39,14 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 79, 89, 94])
+                let data: [UInt8] = [94, 79, 89, 94]
             
-                var result = Data()
+                var result: [UInt8] = []
             
                 for byte in data {
                     result.append(byte ^ 42)
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -60,14 +60,14 @@ final class VAObscuredTests: XCTestCase {
         """,
         expandedSource: """
         let string = {
-            let data = Data([94, 79, 89, 94])
+            let data: [UInt8] = [94, 79, 89, 94]
         
-            var result = Data()
+            var result: [UInt8] = []
         
             for byte in data {
                 result.append(byte ^ 42)
             }
-            return String(bytes: result, encoding: .utf8)!
+            return String(decoding: result, as: UTF8.self)
         }()
         """,
         macros: testMacros
@@ -81,14 +81,14 @@ final class VAObscuredTests: XCTestCase {
         """,
         expandedSource: """
         let string = {
-            let data = Data([94, 79, 89, 94])
+            let data: [UInt8] = [94, 79, 89, 94]
         
-            var result = Data()
+            var result: [UInt8] = []
         
             for byte in data {
                 result.append(byte ^ 42)
             }
-            return String(bytes: result, encoding: .utf8)!
+            return String(decoding: result, as: UTF8.self)
         }()
         """,
         macros: testMacros
@@ -102,14 +102,14 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 79, 89, 94])
+                let data: [UInt8] = [94, 79, 89, 94]
             
-                var result = Data()
+                var result: [UInt8] = []
             
                 for byte in data {
                     result.append(byte ^ 42)
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -123,14 +123,14 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 79, 89, 94])
+                let data: [UInt8] = [94, 79, 89, 94]
             
-                var result = Data()
+                var result: [UInt8] = []
             
                 for byte in data {
                     result.append(byte ^ 42)
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -144,14 +144,14 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 78, 95, 89])
+                let data: [UInt8] = [94, 78, 95, 89]
             
-                var result = Data()
+                var result: [UInt8] = []
                 let max = Int(UInt8.max)
                 for (index, byte) in zip(data.indices, data) {
                     result.append(byte ^ (42 &+ UInt8(index % max)))
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -165,14 +165,14 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 76, 91, 83])
+                let data: [UInt8] = [94, 76, 91, 83]
             
-                var result = Data()
+                var result: [UInt8] = []
                 let max = Int(UInt8.max)
                 for (index, byte) in zip(data.indices, data) {
                     result.append(byte ^ (42 &- UInt8(index % max)))
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -186,16 +186,16 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 79, 89, 94])
+                let data: [UInt8] = [94, 79, 89, 94]
             
-                var result = Data()
+                var result: [UInt8] = []
             
                 let keys: [UInt8] = [42, 42, 42, 42]
                 for (index, byte) in zip(data.indices, data) {
                     let key = keys[index % keys.count]
                     result.append(byte ^ key)
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -209,16 +209,16 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 78, 95, 89])
+                let data: [UInt8] = [94, 78, 95, 89]
             
-                var result = Data()
+                var result: [UInt8] = []
                 let max = Int(UInt8.max)
                 let keys: [UInt8] = [42, 42, 42, 42]
                 for (index, byte) in zip(data.indices, data) {
                     let key = keys[index % keys.count]
                     result.append(byte ^ (key &+ UInt8(index % max)))
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros
@@ -232,16 +232,16 @@ final class VAObscuredTests: XCTestCase {
             """,
             expandedSource: """
             let string = {
-                let data = Data([94, 76, 91, 83])
+                let data: [UInt8] = [94, 76, 91, 83]
             
-                var result = Data()
+                var result: [UInt8] = []
                 let max = Int(UInt8.max)
                 let keys: [UInt8] = [42, 42, 42, 42]
                 for (index, byte) in zip(data.indices, data) {
                     let key = keys[index % keys.count]
                     result.append(byte ^ (key &- UInt8(index % max)))
                 }
-                return String(bytes: result, encoding: .utf8)!
+                return String(decoding: result, as: UTF8.self)
             }()
             """,
             macros: testMacros

@@ -32,10 +32,16 @@ let package = Package(
         ),
         .target(name: "VAObscured", dependencies: ["VAObscuredMacros"]),
         .executableTarget(name: "VAObscuredClient", dependencies: ["VAObscured"]),
+        .target(
+            name: "VAObscuredConsumer",
+            dependencies: ["VAObscured"],
+            path: "Tests/Fixtures/VAObscuredConsumer"
+        ),
         .testTarget(
             name: "VAObscuredTests",
             dependencies: [
                 "VAObscured",
+                "VAObscuredConsumer",
                 "VAObscuredMacros",
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),

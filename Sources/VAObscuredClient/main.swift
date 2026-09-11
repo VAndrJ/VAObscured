@@ -1,5 +1,4 @@
 import VAObscured
-import Foundation
 
 let string = "String"
 
