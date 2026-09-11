@@ -7,15 +7,11 @@ import XCTest
 import VAObscuredMacros
 
 let testMacros: [String: Macro.Type] = [
-    "Obscured": ObscuredMacro.self,
+    "Obscured": DeterministicObscuredMacro.self,
 ]
 
 final class VAObscuredTests: XCTestCase {
     let key: UInt8 = 42
-
-    override class func setUp() {
-        ObscuredMacro.generator = MockGenerator()
-    }
 
     func test_ObscuredMacro_Variable_Failure() throws {
         assertMacroExpansion(

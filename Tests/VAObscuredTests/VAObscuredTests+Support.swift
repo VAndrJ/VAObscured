@@ -14,3 +14,19 @@ struct MockGenerator: RandomNumberGenerator {
         key
     }
 }
+
+#if canImport(VAObscuredMacros)
+import SwiftSyntax
+import SwiftSyntaxMacros
+@testable import VAObscuredMacros
+
+struct DeterministicObscuredMacro: ExpressionMacro {
+    static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) -> ExprSyntax {
+        var generator = MockGenerator()
+        return ObscuredMacro.expansion(of: node, in: context, using: &generator)
+    }
+}
+#endif

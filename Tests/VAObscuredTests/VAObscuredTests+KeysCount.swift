@@ -45,10 +45,12 @@ struct VAObscuredKeysCountTests {
     func generationHelpersRejectInvalidCount(count: Int) {
         for isAdding: Bool? in [nil, true, false] {
             #expect(throws: VAObscuredError.self) {
-                try ObscuredMacro.getXORCodeBlockItemListSyntax(data: Data("test".utf8), keysCount: count, isAdding: isAdding)
+                var generator = MockGenerator()
+                _ = try ObscuredMacro.getXORCodeBlockItemListSyntax(data: Data("test".utf8), keysCount: count, isAdding: isAdding, using: &generator)
             }
             #expect(throws: VAObscuredError.self) {
-                try ObscuredMacro.getXORMultipleKeysCodeBlockItemListSyntax(data: Data(), keysCount: count, isAdding: isAdding)
+                var generator = MockGenerator()
+                _ = try ObscuredMacro.getXORMultipleKeysCodeBlockItemListSyntax(data: Data(), keysCount: count, isAdding: isAdding, using: &generator)
             }
         }
     }

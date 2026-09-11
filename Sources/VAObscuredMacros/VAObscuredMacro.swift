@@ -5,8 +5,6 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 public struct ObscuredMacro: ExpressionMacro {
-    public static var generator: RandomNumberGenerator = SystemRandomNumberGenerator()
-
     static func generateKey(isAdding: Bool?, using generator: inout some RandomNumberGenerator) -> UInt8 {
         var key: UInt8
         repeat {
@@ -18,6 +16,15 @@ public struct ObscuredMacro: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
+    ) -> ExprSyntax {
+        var generator = SystemRandomNumberGenerator()
+        return expansion(of: node, in: context, using: &generator)
+    }
+
+    static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext,
+        using generator: inout some RandomNumberGenerator
     ) -> ExprSyntax {
         do {
             if let closure = node.trailingClosure {
@@ -38,7 +45,8 @@ public struct ObscuredMacro: ExpressionMacro {
                             try getXORCodeBlockItemListSyntax(
                                 data: data,
                                 keysCount: arguments.keysCount,
-                                isAdding: arguments.isAdding
+                                isAdding: arguments.isAdding,
+                                using: &generator
                             )
                             ReturnStmtSyntax(expression: ExprSyntax("String(decoding: result, as: UTF8.self)"))
                         })
@@ -61,15 +69,15 @@ public struct ObscuredMacro: ExpressionMacro {
         }
     }
 
-    public static func getXORCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
+    static func getXORCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
         if keysCount == 1 {
-            return try getXORCodeBlockItemListSyntax(data: data, isAdding: isAdding)
+            return try getXORCodeBlockItemListSyntax(data: data, isAdding: isAdding, using: &generator)
         } else {
-            return try getXORMultipleKeysCodeBlockItemListSyntax(data: data, keysCount: keysCount, isAdding: isAdding)
+            return try getXORMultipleKeysCodeBlockItemListSyntax(data: data, keysCount: keysCount, isAdding: isAdding, using: &generator)
         }
     }
 
-    public static func getXORMultipleKeysCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
+    static func getXORMultipleKeysCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
         guard Arguments.supportedKeysCount.contains(keysCount) else {
             throw VAObscuredError.invalidKeysCount
         }
@@ -96,7 +104,7 @@ public struct ObscuredMacro: ExpressionMacro {
         )
     }
 
-    public static func getXORCodeBlockItemListSyntax(data: Data, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
+    static func getXORCodeBlockItemListSyntax(data: Data, isAdding: Bool?, using generator: inout some RandomNumberGenerator) throws -> CodeBlockItemListSyntax {
         let key = generateKey(isAdding: isAdding, using: &generator)
         let xorData: [UInt8] = Array(xor(data: data, key: key, isAdding: isAdding))
 
