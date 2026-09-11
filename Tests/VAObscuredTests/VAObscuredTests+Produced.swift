@@ -76,9 +76,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧"),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 
     func test_Obscured_Produced_ShiftAddition() throws {
@@ -145,9 +143,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧", encoding: .xor(keysCount: 1, keyShift: .addition)),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 
     func test_Obscured_Produced_ShiftSubstraction() throws {
@@ -214,9 +210,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧", encoding: .xor(keysCount: 1, keyShift: .substraction)),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 
     func test_Obscured_Produced_MultipleKeys() throws {
@@ -283,9 +277,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧", encoding: .xor(keysCount: 4)),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 
     func test_Obscured_Produced_MultipleKeys_ShiftAddition() throws {
@@ -352,9 +344,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧", encoding: .xor(keysCount: 4, keyShift: .addition)),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 
     func test_Obscured_Produced_MultipleKeys_ShiftSubstraction() throws {
@@ -421,9 +411,7 @@ extension VAObscuredTests {
             #Obscured("👍🤔💩⬆️❗️·°🏃‍♂️💨🟩👀🤞🤦🏻‍♂️💥🤨👇⚠️📻👌💪👆😱👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👨‍👨‍👧‍👧👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👩‍👦👩‍👧👩‍👧‍👦👩‍👦‍👦👩‍👧‍👧👨‍👦👨‍👧👨‍👧‍👦👨‍👦‍👦👨‍👧‍👧", encoding: .xor(keysCount: 4, keyShift: .substraction)),
         ]
 
-        for (expected, produced) in zip(expectedArr, producedArr) {
-            XCTAssertEqual(expected, produced)
-        }
+        XCTAssertEqual(expectedArr, producedArr)
     }
 }
 #endif
