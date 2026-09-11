@@ -50,7 +50,9 @@ public struct ObscuredMacro: ExpressionMacro {
                 )
             )
         } catch {
-            if let error = error as? VAObscuredError {
+            if let error = error as? ArgumentError {
+                context.diagnose(error.error.getDiagnostic(node: error.node))
+            } else if let error = error as? VAObscuredError {
                 context.diagnose(error.getDiagnostic(node: node))
             } else {
                 context.diagnose(VAObscuredError.unhandled.getDiagnostic(node: node))
@@ -69,6 +71,9 @@ public struct ObscuredMacro: ExpressionMacro {
     }
 
     public static func getXORMultipleKeysCodeBlockItemListSyntax(data: Data, keysCount: Int, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
+        guard Arguments.supportedKeysCount.contains(keysCount) else {
+            throw VAObscuredError.invalidKeysCount
+        }
         let keys: [UInt8] = (0..<keysCount).map { _ in .random(in: .min...UInt8.max, using: &generator) }
         let xorData: [UInt8] = Array(xor(data: data, keys: keys, isAdding: isAdding))
 

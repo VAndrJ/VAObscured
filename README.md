@@ -15,6 +15,10 @@
 
 Encodes String literals to make them a little harder to find.
 
+`keysCount` defaults to `1` and must be an integer literal in `1...1024`.
+Decimal, hexadecimal, octal, and binary literals (including digit separators) are supported.
+Zero, negative values, values above `1024`, variables, and expressions produce a compile-time diagnostic.
+
 
 Example 1:
 

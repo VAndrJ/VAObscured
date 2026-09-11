@@ -15,6 +15,7 @@ public enum ObscuredEncoding {
         case none
     }
 
+    /// When used with `#Obscured`, `keysCount` must be an integer literal in `1...1024`.
     case xor(keysCount: Int = 1, keyShift: KeyShift = .none)
 
     public static let xor: ObscuredEncoding = .xor(keysCount: 1, keyShift: .none)
