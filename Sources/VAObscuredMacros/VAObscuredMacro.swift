@@ -48,7 +48,7 @@ public struct ObscuredMacro: ExpressionMacro {
                                 isAdding: arguments.isAdding,
                                 using: &generator
                             )
-                            ReturnStmtSyntax(expression: ExprSyntax("String(decoding: result, as: UTF8.self)"))
+                            ReturnStmtSyntax(expression: ExprSyntax("Swift.String(decoding: result, as: Swift.UTF8.self)"))
                         })
                     ),
                     leftParen: .leftParenToken(),
@@ -91,14 +91,14 @@ public struct ObscuredMacro: ExpressionMacro {
         return CodeBlockItemListSyntax(
             """
 
-                let data: [UInt8] = \(raw: xorData)
+                let data: [Swift.UInt8] = \(raw: xorData)
 
-                var result: [UInt8] = []
-                \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
-                let keys: [UInt8] = \(raw: keys)
-                for (index, byte) in zip(data.indices, data) {
+                var result: [Swift.UInt8] = []
+                \(raw: (isAdding == nil ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
+                let keys: [Swift.UInt8] = \(raw: keys)
+                for (index, byte) in Swift.zip(data.indices, data) {
                     let key = keys[index % keys.count]
-                    result.append(byte ^ \(raw: (isAdding == true ? "(key &+ UInt8(index % max))" : isAdding == false ? "(key &- UInt8(index % max))" : "key")))
+                    result.append(byte ^ \(raw: (isAdding == true ? "(key &+ Swift.UInt8(index % max))" : isAdding == false ? "(key &- Swift.UInt8(index % max))" : "key")))
                 }
             """
         )
@@ -115,12 +115,12 @@ public struct ObscuredMacro: ExpressionMacro {
         return CodeBlockItemListSyntax(
             """
 
-                let data: [UInt8] = \(raw: xorData)
+                let data: [Swift.UInt8] = \(raw: xorData)
 
-                var result: [UInt8] = []
-                \(raw: (isAdding == nil ? "" : "let max = Int(UInt8.max)"))
-                for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in zip(data.indices, data)")) {
-                    result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ UInt8(index % max))" : isAdding == false ? "(\(key) &- UInt8(index % max))" : "\(key)")))
+                var result: [Swift.UInt8] = []
+                \(raw: (isAdding == nil ? "" : "let max = Swift.Int(Swift.UInt8.max)"))
+                for \(raw: (isAdding == nil ? "byte in data" : "(index, byte) in Swift.zip(data.indices, data)")) {
+                    result.append(byte ^ \(raw: (isAdding == true ? "(\(key) &+ Swift.UInt8(index % max))" : isAdding == false ? "(\(key) &- Swift.UInt8(index % max))" : "\(key)")))
                 }
             """
         )

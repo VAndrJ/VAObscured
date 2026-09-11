@@ -16,8 +16,8 @@ struct VAObscuredRandomIsolationTests {
 
         #expect(context.diagnostics.isEmpty)
         #expect(generator.calls == 5)
-        #expect(expanded.contains("let keys: [UInt8] = [1, 42, 255, 128]"))
-        #expect(expanded.contains("let data: [UInt8] = [49, 27, 205, 179, 53, 31, 201, 183, 57, 19]"))
+        #expect(expanded.contains("let keys: [Swift.UInt8] = [1, 42, 255, 128]"))
+        #expect(expanded.contains("let data: [Swift.UInt8] = [49, 27, 205, 179, 53, 31, 201, 183, 57, 19]"))
     }
 
     @Test

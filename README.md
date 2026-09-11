@@ -53,14 +53,14 @@ let string = #Obscured("test")
 // expands to
 
 let string = {
-    let data: [UInt8] = [94, 79, 89, 94]
+    let data: [Swift.UInt8] = [94, 79, 89, 94]
 
-    var result: [UInt8] = []
+    var result: [Swift.UInt8] = []
     for byte in data {
         result.append(byte ^ 42) // 42 is a random number.
     }
 
-    return String(decoding: result, as: UTF8.self)
+    return Swift.String(decoding: result, as: Swift.UTF8.self)
 }()
 ```
 
@@ -74,16 +74,16 @@ let string = #Obscured("test", encoding: .xor(keysCount: 4, keyShift: .addition)
 // expands to
 
 let string = {
-    let data: [UInt8] = [94, 78, 95, 89]
+    let data: [Swift.UInt8] = [94, 78, 95, 89]
 
-    var result: [UInt8] = []
-    let max = Int(UInt8.max)
-    let keys: [UInt8] = [42, 42, 42, 42] // Random numbers here.
-    for (index, byte) in zip(data.indices, data) {
+    var result: [Swift.UInt8] = []
+    let max = Swift.Int(Swift.UInt8.max)
+    let keys: [Swift.UInt8] = [42, 42, 42, 42] // Random numbers here.
+    for (index, byte) in Swift.zip(data.indices, data) {
         let key = keys[index % keys.count]
-        result.append(byte ^ (key &+ UInt8(index % max)))
+        result.append(byte ^ (key &+ Swift.UInt8(index % max)))
     }
-    return String(decoding: result, as: UTF8.self)
+    return Swift.String(decoding: result, as: Swift.UTF8.self)
 }()
 ```
 
