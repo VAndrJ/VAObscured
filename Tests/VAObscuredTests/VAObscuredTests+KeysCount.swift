@@ -60,7 +60,7 @@ struct VAObscuredKeysCountTests {
         #expect(#Obscured("test", encoding: .xor(keysCount: 1)) == "test")
         #expect(#Obscured("test", encoding: .xor(keysCount: 1024)) == "test")
         #expect(#Obscured("test", encoding: .xor(keysCount: 1_024, keyShift: .addition)) == "test")
-        #expect(#Obscured("test", encoding: .xor(keysCount: 0x400, keyShift: .substraction)) == "test")
+        #expect(#Obscured("test", encoding: .xor(keysCount: 0x400, keyShift: .subtraction)) == "test")
     }
 }
 #endif

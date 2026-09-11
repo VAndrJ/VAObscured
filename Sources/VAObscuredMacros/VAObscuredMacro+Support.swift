@@ -110,7 +110,7 @@ private func parseEncoding(_ expression: ExprSyntax) throws -> (Int, Bool?) {
 }
 
 private func parseKeyShift(_ expression: ExprSyntax) throws -> Bool? {
-    for (name, shift): (String, Bool?) in [("none", nil), ("addition", true), ("substraction", false)] {
+    for (name, shift): (String, Bool?) in [("none", nil), ("addition", true), ("subtraction", false)] {
         if isMember(
             expression,
             named: name,

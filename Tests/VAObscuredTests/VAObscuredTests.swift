@@ -154,10 +154,10 @@ final class VAObscuredTests: XCTestCase {
         )
     }
 
-    func test_ObscuredMacro_XOR_ExplicitShiftKeysSubstraction_Success() throws {
+    func test_ObscuredMacro_XOR_ExplicitShiftKeysSubtraction_Success() throws {
         assertMacroExpansion(
             """
-            let string = #Obscured("test", encoding: .xor(keysCount: 1, keyShift: .substraction))
+            let string = #Obscured("test", encoding: .xor(keysCount: 1, keyShift: .subtraction))
             """,
             expandedSource: """
             let string = {
@@ -221,10 +221,10 @@ final class VAObscuredTests: XCTestCase {
         )
     }
 
-    func test_ObscuredMacro_XOR_MultipleKeysCountSubstraction_Success() throws {
+    func test_ObscuredMacro_XOR_MultipleKeysCountSubtraction_Success() throws {
         assertMacroExpansion(
             """
-            let string = #Obscured("test", encoding: .xor(keysCount: 4, keyShift: .substraction))
+            let string = #Obscured("test", encoding: .xor(keysCount: 4, keyShift: .subtraction))
             """,
             expandedSource: """
             let string = {

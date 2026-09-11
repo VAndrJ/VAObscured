@@ -31,7 +31,7 @@ struct VAObscuredArgumentTests {
         [
             "none",
             "addition",
-            "substraction",
+            "subtraction",
         ]
     )
     func encodingAndShiftMembers(qualifier: String, shift: String) throws {

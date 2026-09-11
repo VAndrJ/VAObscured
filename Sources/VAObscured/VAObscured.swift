@@ -11,7 +11,7 @@ public macro Obscured(
 public enum ObscuredEncoding {
     public enum KeyShift: Equatable, CaseIterable {
         case addition
-        case substraction
+        case subtraction
         case none
     }
 

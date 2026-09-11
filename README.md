@@ -38,7 +38,7 @@ Zero, negative values, values above `1024`, variables, and expressions produce a
 
 `encoding` accepts `.xor`, `.xor()`, or `.xor(keysCount: ..., keyShift: ...)`, with either
 argument optional. Each label may appear once, with `keysCount` before `keyShift` when both
-are supplied. `keyShift` accepts `.none`, `.addition`, or `.substraction`.
+are supplied. `keyShift` accepts `.none`, `.addition`, or `.subtraction`.
 Encoding members may be qualified with `ObscuredEncoding` or `VAObscured.ObscuredEncoding`;
 shift members may use the corresponding `KeyShift` type. Variables, type aliases, helper
 calls, and other expressions are not evaluated by the macro and are diagnosed instead.

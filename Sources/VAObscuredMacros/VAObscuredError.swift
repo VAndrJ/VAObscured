@@ -30,7 +30,7 @@ public enum VAObscuredError: Error, CustomStringConvertible, DiagnosticMessage {
         case .invalidEncoding: "encoding must be .xor or a direct .xor(...) call, optionally qualified with ObscuredEncoding or VAObscured.ObscuredEncoding."
         case .invalidEncodingArguments: "xor accepts only keysCount and keyShift, in that order, each at most once."
         case .invalidKeyShift:
-            "keyShift must be .none, .addition, or .substraction, optionally qualified with ObscuredEncoding.KeyShift or VAObscured.ObscuredEncoding.KeyShift."
+            "keyShift must be .none, .addition, or .subtraction, optionally qualified with ObscuredEncoding.KeyShift or VAObscured.ObscuredEncoding.KeyShift."
         case .failedToGetData: "Failed to get `.utf8` Data from String literal."
         case .obscuredIsNotValid: "Obscured string is not valid."
         case .unhandled: "Unhandled error."
