@@ -7,6 +7,14 @@ import SwiftSyntaxMacros
 public struct ObscuredMacro: ExpressionMacro {
     public static var generator: RandomNumberGenerator = SystemRandomNumberGenerator()
 
+    static func generateKey(isAdding: Bool?, using generator: inout some RandomNumberGenerator) -> UInt8 {
+        var key: UInt8
+        repeat {
+            key = .random(in: .min...UInt8.max, using: &generator)
+        } while isAdding == nil && key == 0
+        return key
+    }
+
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
@@ -65,7 +73,7 @@ public struct ObscuredMacro: ExpressionMacro {
         guard Arguments.supportedKeysCount.contains(keysCount) else {
             throw VAObscuredError.invalidKeysCount
         }
-        let keys: [UInt8] = (0..<keysCount).map { _ in .random(in: .min...UInt8.max, using: &generator) }
+        let keys: [UInt8] = (0..<keysCount).map { _ in generateKey(isAdding: isAdding, using: &generator) }
         let xorData: [UInt8] = Array(xor(data: data, keys: keys, isAdding: isAdding))
 
         guard getIsXORValid(result: xorData, keys: keys, isAdding: isAdding) else {
@@ -89,7 +97,7 @@ public struct ObscuredMacro: ExpressionMacro {
     }
 
     public static func getXORCodeBlockItemListSyntax(data: Data, isAdding: Bool?) throws -> CodeBlockItemListSyntax {
-        let key: UInt8 = .random(in: .min...UInt8.max, using: &generator)
+        let key = generateKey(isAdding: isAdding, using: &generator)
         let xorData: [UInt8] = Array(xor(data: data, key: key, isAdding: isAdding))
 
         guard getIsXORValid(result: xorData, key: key, isAdding: isAdding) else {

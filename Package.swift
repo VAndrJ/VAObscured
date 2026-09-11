@@ -32,6 +32,11 @@ let package = Package(
         ),
         .target(name: "VAObscured", dependencies: ["VAObscuredMacros"]),
         .executableTarget(name: "VAObscuredClient", dependencies: ["VAObscured"]),
+        .executableTarget(
+            name: "VAObscuredBinaryCheck",
+            dependencies: ["VAObscured"],
+            path: "Tests/Fixtures/VAObscuredBinaryCheck"
+        ),
         .target(
             name: "VAObscuredConsumer",
             dependencies: ["VAObscured"],

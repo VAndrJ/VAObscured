@@ -18,6 +18,20 @@ Encodes String literals to make them a little harder to find.
 Use `import VAObscured` to access the macro. Generated code uses Swift byte arrays and
 UTF-8 decoding, so consumers do not need to import Foundation.
 
+This is reversible obfuscation: the encoded bytes, keys, and decoding logic are embedded
+in the executable, and the decoded string exists in memory at runtime. It is not encryption
+or a way to protect secrets. When `keyShift` is `.none` (the default), every generated key
+is nonzero so XOR cannot leave a byte unchanged through a zero key. Shifted modes may use
+zero base keys; their effective keys vary with the byte index.
+
+Run `python3 Scripts/check-optimized-binary.py` to build a release consumer, verify that
+all six encoding modes decode correctly, and scan the executable for complete plaintext
+probes in UTF-8 and UTF-16. An ordinary plaintext control must also be found. The check
+fails if a probe is discoverable or a control fails. It assesses that compiler/build only:
+optimizations can change the output, and absence of a complete probe does not establish
+resistance to reverse engineering or rule out plaintext fragments, debug files, or runtime inspection.
+Additional SwiftPM options can follow `--`, such as `--scratch-path /tmp/obscured-check`.
+
 `keysCount` defaults to `1` and must be an integer literal in `1...1024`.
 Decimal, hexadecimal, octal, and binary literals (including digit separators) are supported.
 Zero, negative values, values above `1024`, variables, and expressions produce a compile-time diagnostic.
