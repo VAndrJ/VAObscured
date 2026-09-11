@@ -5,6 +5,7 @@
 //  Created by VAndrJ on 14.07.2024.
 //
 
+import SwiftParser
 import SwiftSyntax
 
 struct Arguments {
@@ -17,7 +18,13 @@ struct Arguments {
 extension LabeledExprListSyntax {
     var arguments: Arguments {
         get throws {
-            guard let string = first?.expression.as(StringLiteralExprSyntax.self)?.segments.first?.as(StringSegmentSyntax.self)?.content.text else {
+            guard let literal = first?.expression.as(StringLiteralExprSyntax.self) else {
+                throw VAObscuredError.notStringLiteral
+            }
+            guard !literal.segments.contains(where: { $0.is(ExpressionSegmentSyntax.self) }) else {
+                throw VAObscuredError.interpolationNotSupported
+            }
+            guard let string = literal.representedLiteralValue else {
                 throw VAObscuredError.notStringLiteral
             }
 
@@ -31,10 +38,14 @@ extension LabeledExprListSyntax {
                         if labeledExpr.expression.description.contains("xor") {
                             if let arguments = labeledExpr.expression.as(FunctionCallExprSyntax.self)?.arguments {
                                 for argument in arguments {
-                                    if argument.label?.text == "keysCount", let count = argument.expression.as(IntegerLiteralExprSyntax.self)?.literal.text, let keys = Int(count), keys != 1 {
+                                    if argument.label?.text == "keysCount", let count = argument.expression.as(IntegerLiteralExprSyntax.self)?.literal.text,
+                                        let keys = Int(count), keys != 1
+                                    {
                                         keysCount = keys
                                     }
-                                    if argument.label?.text == "keyShift", let value = argument.expression.as(MemberAccessExprSyntax.self)?.declName.baseName.text {
+                                    if argument.label?.text == "keyShift",
+                                        let value = argument.expression.as(MemberAccessExprSyntax.self)?.declName.baseName.text
+                                    {
                                         switch value {
                                         case "addition": isAdding = true
                                         case "substraction": isAdding = false

@@ -5,11 +5,12 @@
 //  Created by VAndrJ on 14.07.2024.
 //
 
-import SwiftSyntax
 import SwiftDiagnostics
+import SwiftSyntax
 
 public enum VAObscuredError: Error, CustomStringConvertible, DiagnosticMessage {
     case notStringLiteral
+    case interpolationNotSupported
     case failedToGetData
     case obscuredIsNotValid
     case unhandled
@@ -17,6 +18,7 @@ public enum VAObscuredError: Error, CustomStringConvertible, DiagnosticMessage {
     public var description: String {
         switch self {
         case .notStringLiteral: "Should be a String literal, not a variable or expression."
+        case .interpolationNotSupported: "String interpolation is not supported. Use a String literal without interpolation."
         case .failedToGetData: "Failed to get `.utf8` Data from String literal."
         case .obscuredIsNotValid: "Obscured string is not valid."
         case .unhandled: "Unhandled error."
